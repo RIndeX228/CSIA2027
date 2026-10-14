@@ -1,0 +1,44 @@
+{
+  "widgets": [
+    {
+      "weather": {
+        "updateRate": 900,
+        "parserFile": "WeatherScraper.cs",
+        "primaryColor": "#3D5AFE",
+        "enabled": true,
+        "position": 0,
+        "latitude": 52.2297,
+        "longitude": 21.0175
+      }
+    },
+    {
+      "github": {
+        "updateRate": 300,
+        "parserFile": "GitHubNotificationsScraper.cs",
+        "primaryColor": "#FF2FA3",
+        "enabled": true,
+        "position": 1
+      }
+    },
+    {
+      "stocks": {
+        "updateRate": 120,
+        "parserFile": "StockScraper.cs",
+        "primaryColor": "#FF8A1E",
+        "enabled": true,
+        "position": 2,
+        "symbols": [ "AAPL", "MSFT" ]
+      }
+    },
+    {
+      "news": {
+        "updateRate": 600,
+        "parserFile": "RssScraper.cs",
+        "primaryColor": "#22D3EE",
+        "enabled": true,
+        "position": 3,
+        "feedUrl": "https://feeds.bbci.co.uk/news/rss.xml"
+      }
+    }
+  ]
+}
