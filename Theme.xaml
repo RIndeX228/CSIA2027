@@ -1,28 +1,33 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 					 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-	<!-- Base palette (DSGN.HOUSE reference) -->
+	<!-- These are the startup defaults. config.json overwrites the brushes
+		 below at runtime, so editing here only changes what you see before
+		 the config loads (or if it's missing). -->
+
+	<!-- Base palette -->
 	<Color x:Key="VoidBlack">#06070A</Color>
 	<Color x:Key="ElectricCobalt">#3D5AFE</Color>
 	<Color x:Key="SynthMagenta">#FF2FA3</Color>
 	<Color x:Key="ToxicAmber">#FF8A1E</Color>
 	<Color x:Key="TitaniumFog">#AEB6C2</Color>
-	<Color x:Key="HolographicPearl">#F5F7FF</Color>
 	<Color x:Key="SignalCyan">#22D3EE</Color>
-	<!-- Holographic Pearl is intentionally unused below - reserved for a
-		 future widget or UI chrome (see README). -->
+	<Color x:Key="HolographicPearl">#F5F7FF</Color>
 
-	<!-- Shared text -->
-	<SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TitaniumFog}" />
-
-	<!-- Per-widget accents -->
-	<SolidColorBrush x:Key="NewsAccentBrush" Color="{StaticResource SignalCyan}" />
+	<!-- Accents: icon, widget name, headline value -->
 	<SolidColorBrush x:Key="WeatherAccentBrush" Color="{StaticResource ElectricCobalt}" />
 	<SolidColorBrush x:Key="GitHubAccentBrush" Color="{StaticResource SynthMagenta}" />
 	<SolidColorBrush x:Key="StockAccentBrush" Color="{StaticResource ToxicAmber}" />
+	<SolidColorBrush x:Key="NewsAccentBrush" Color="{StaticResource SignalCyan}" />
 
-	<!-- Per-widget card backgrounds: Void Black toward a ~20% tint of the
-		 widget's own accent. Kept dark and muted on purpose. -->
+	<!-- Secondary: the supporting line under each headline -->
+	<SolidColorBrush x:Key="WeatherSecondaryBrush" Color="{StaticResource TitaniumFog}" />
+	<SolidColorBrush x:Key="GitHubSecondaryBrush" Color="{StaticResource TitaniumFog}" />
+	<SolidColorBrush x:Key="StockSecondaryBrush" Color="{StaticResource TitaniumFog}" />
+	<SolidColorBrush x:Key="NewsSecondaryBrush" Color="{StaticResource TitaniumFog}" />
+
+	<!-- Card backgrounds: Void Black sliding toward ~22% of the accent.
+		 Same blend is done in code when config.json sets a colour. -->
 	<LinearGradientBrush x:Key="WeatherCardBackground" StartPoint="0,0" EndPoint="1,1">
 		<GradientStop Color="{StaticResource VoidBlack}" Offset="0" />
 		<GradientStop Color="#121940" Offset="1" />
@@ -39,5 +44,127 @@
 		<GradientStop Color="{StaticResource VoidBlack}" Offset="0" />
 		<GradientStop Color="#0C343C" Offset="1" />
 	</LinearGradientBrush>
+
+
+	<!-- ================= edit state ================= -->
+
+	<!-- Same for every widget, so these are plain StaticResources -->
+	<SolidColorBrush x:Key="ControlBrush" Color="{StaticResource TitaniumFog}" />
+	<SolidColorBrush x:Key="InputTextBrush" Color="{StaticResource HolographicPearl}" />
+
+	<!-- The window has an IsEditing property (see MainWindow.xaml.cs). These two
+		 styles just follow it: EditOnly shows its element while editing,
+		 ViewOnly hides it. Nothing in the code has to show/hide anything. -->
+	<Style x:Key="EditOnly" TargetType="FrameworkElement">
+		<Setter Property="Visibility" Value="Collapsed" />
+		<Style.Triggers>
+			<DataTrigger Binding="{Binding IsEditing, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+				<Setter Property="Visibility" Value="Visible" />
+			</DataTrigger>
+		</Style.Triggers>
+	</Style>
+
+	<Style x:Key="ViewOnly" TargetType="FrameworkElement">
+		<Style.Triggers>
+			<DataTrigger Binding="{Binding IsEditing, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+				<Setter Property="Visibility" Value="Collapsed" />
+			</DataTrigger>
+		</Style.Triggers>
+	</Style>
+
+	<!-- Button with no frame. Used for the order arrows. -->
+	<Style x:Key="FlatButton" TargetType="Button">
+		<Setter Property="Background" Value="Transparent" />
+		<Setter Property="Foreground" Value="{StaticResource ControlBrush}" />
+		<Setter Property="FontFamily" Value="Segoe UI Variable, Segoe UI" />
+		<Setter Property="FontSize" Value="12" />
+		<Setter Property="Padding" Value="8,3" />
+		<Setter Property="Cursor" Value="Hand" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Border Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+						<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+					</Border>
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsMouseOver" Value="True">
+							<Setter Property="Opacity" Value="0.7" />
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<!-- Same button on a dark pill so it stays readable on any wallpaper.
+		 Pencil, Save, Reset & save. -->
+	<Style x:Key="PillButton" TargetType="Button" BasedOn="{StaticResource FlatButton}">
+		<Setter Property="Background" Value="#CC06070A" />
+		<Setter Property="Padding" Value="10,4" />
+	</Style>
+
+	<!-- Text box for the hex colour and the widget settings -->
+	<Style x:Key="EditBox" TargetType="TextBox">
+		<Setter Property="Foreground" Value="{StaticResource InputTextBrush}" />
+		<Setter Property="CaretBrush" Value="{StaticResource InputTextBrush}" />
+		<Setter Property="Background" Value="#33FFFFFF" />
+		<Setter Property="BorderBrush" Value="#44FFFFFF" />
+		<Setter Property="BorderThickness" Value="1" />
+		<Setter Property="FontFamily" Value="Segoe UI Variable, Segoe UI" />
+		<Setter Property="FontSize" Value="12" />
+		<Setter Property="Padding" Value="6,3" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="TextBox">
+					<Border Background="{TemplateBinding Background}"
+							BorderBrush="{TemplateBinding BorderBrush}"
+							BorderThickness="{TemplateBinding BorderThickness}"
+							CornerRadius="6">
+						<ScrollViewer x:Name="PART_ContentHost" Padding="{TemplateBinding Padding}" />
+					</Border>
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsKeyboardFocused" Value="True">
+							<Setter Property="BorderBrush" Value="#99FFFFFF" />
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<!-- Small label above a settings box -->
+	<Style x:Key="EditCaption" TargetType="TextBlock">
+		<Setter Property="FontFamily" Value="Segoe UI Variable, Segoe UI" />
+		<Setter Property="FontSize" Value="11" />
+		<Setter Property="Margin" Value="0,8,0,3" />
+	</Style>
+
+	<!-- On/off switch. The track takes the Foreground colour when it's on,
+		 so each widget sets Foreground to its own accent brush. -->
+	<Style x:Key="SwitchToggle" TargetType="ToggleButton">
+		<Setter Property="Width" Value="34" />
+		<Setter Property="Height" Value="18" />
+		<Setter Property="HorizontalAlignment" Value="Left" />
+		<Setter Property="VerticalAlignment" Value="Center" />
+		<Setter Property="Cursor" Value="Hand" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="ToggleButton">
+					<Border x:Name="Track" CornerRadius="9" Background="#44FFFFFF">
+						<Ellipse x:Name="Knob" Width="12" Height="12" Fill="White"
+								 HorizontalAlignment="Left" Margin="3,0,0,0" />
+					</Border>
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsChecked" Value="True">
+							<Setter TargetName="Track" Property="Background"
+									Value="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}" />
+							<Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right" />
+							<Setter TargetName="Knob" Property="Margin" Value="0,0,3,0" />
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
 
 </ResourceDictionary>

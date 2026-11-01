@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace CS_IA_2027.Contracts;
 
@@ -8,6 +9,7 @@ namespace CS_IA_2027.Contracts;
 // silently kept falling back to defaults.
 public class Config
 {
+	#region Properties
 	// Matches the file: an array of objects, each holding one named widget.
 	// A plain object ("widgets": { "weather": {...} }) would be tidier, but
 	// this keeps the file looking the way it was designed.
@@ -16,9 +18,55 @@ public class Config
 	private static readonly JsonSerializerOptions Options = new()
 	{
 		PropertyNameCaseInsensitive = true,
+		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,                // saves "updateRate", not "UpdateRate"
+		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,     // no "latitude": null for widgets that don't use it
 		WriteIndented = true
 	};
+	#endregion
 
+	#region Constructors
+	// Used on first run so there's always a file sitting there to edit,
+	// and by the reset button in the edit state.
+	public static Config Default()
+	{
+		var cfg = new Config();
+
+		cfg.Add("weather", new WidgetConfig
+		{
+			UpdateRate = 900,
+			PrimaryColor = "#3D5AFE",
+			Position = 0,
+			Latitude = WidgetConfig.DefaultLatitude,
+			Longitude = WidgetConfig.DefaultLongitude
+		});
+
+		cfg.Add("github", new WidgetConfig
+		{
+			UpdateRate = 300,
+			PrimaryColor = "#FF2FA3",
+			Position = 1
+		});
+
+		cfg.Add("stocks", new WidgetConfig
+		{
+			UpdateRate = 120,
+			PrimaryColor = "#FF8A1E",
+			Position = 2,
+			Symbols = new[] { "AAPL", "MSFT" }
+		});
+
+		cfg.Add("news", new WidgetConfig
+		{
+			UpdateRate = 600,
+			PrimaryColor = "#22D3EE",
+			Position = 3,
+			FeedUrl = "https://feeds.bbci.co.uk/news/rss.xml"
+		});
+
+		return cfg;
+	}
+	#endregion
+	#region Methods
 	// Flattens the array-of-one-key-objects into something usable.
 	// Duplicate keys: first one wins.
 	public Dictionary<string, WidgetConfig> WidgetMap()
@@ -59,47 +107,7 @@ public class Config
 		await using FileStream fs = File.Create(path);
 		await JsonSerializer.SerializeAsync(fs, this, Options);
 	}
-
-	// Used on first run so there's always a file sitting there to edit.
-	private static Config Default()
-	{
-		var cfg = new Config();
-
-		cfg.Add("weather", new WidgetConfig
-		{
-			UpdateRate = 900,
-			PrimaryColor = "#3D5AFE",
-			Position = 0,
-			Latitude = 52.2297f,
-			Longitude = 21.0175f
-		});
-
-		cfg.Add("github", new WidgetConfig
-		{
-			UpdateRate = 300,
-			PrimaryColor = "#FF2FA3",
-			Position = 1
-		});
-
-		cfg.Add("stocks", new WidgetConfig
-		{
-			UpdateRate = 120,
-			PrimaryColor = "#FF8A1E",
-			Position = 2,
-			Symbols = new[] { "AAPL", "MSFT" }
-		});
-
-		cfg.Add("news", new WidgetConfig
-		{
-			UpdateRate = 600,
-			PrimaryColor = "#22D3EE",
-			Position = 3,
-			FeedUrl = "https://feeds.bbci.co.uk/news/rss.xml"
-		});
-
-		return cfg;
-	}
-
 	private void Add(string key, WidgetConfig widget) =>
 		Widgets.Add(new Dictionary<string, WidgetConfig> { [key] = widget });
+	#endregion
 }
